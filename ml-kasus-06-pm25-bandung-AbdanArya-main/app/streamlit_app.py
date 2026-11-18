@@ -1,3 +1,355 @@
+import sys
+from pathlib import Path
+from datetime import datetime, timedelta
+
+import pandas as pd
+import streamlit as st
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from app.predictor import load_resources, predict_pm25
+from src.features import STATIONS
+
+
+# -----------------------------------------------------------------------------
+# Page setup and visual theme
+# -----------------------------------------------------------------------------
+st.set_page_config(
+    page_title="Udara Bandung | Prediksi PM2.5",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+st.markdown(
+    """
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
+      html, body, [class*="css"] {
+        font-family: 'DM Sans', sans-serif;
+      }
+      [data-testid="stAppViewContainer"] {
+        background: linear-gradient(180deg, #f2f7f6 0%, #f7f9fb 42%, #ffffff 100%);
+      }
+      [data-testid="stHeader"] { background: rgba(0,0,0,0); }
+      .block-container {
+        max-width: 1180px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+      }
+      .hero {
+        padding: 2.1rem 2.2rem;
+        border-radius: 24px;
+        color: #f5fffd;
+        background: linear-gradient(120deg, #102f3a 0%, #155b5d 58%, #23877b 100%);
+        box-shadow: 0 18px 45px rgba(16, 47, 58, .16);
+        margin-bottom: 1.15rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero:after {
+        content: "";
+        position: absolute;
+        width: 270px;
+        height: 270px;
+        right: -75px;
+        top: -125px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.14);
+        box-shadow: 0 0 0 28px rgba(255,255,255,.035), 0 0 0 58px rgba(255,255,255,.025);
+      }
+      .hero-kicker {
+        color: #b7e8dd;
+        font-size: .75rem;
+        font-weight: 800;
+        letter-spacing: .15em;
+        text-transform: uppercase;
+        margin-bottom: .8rem;
+      }
+      .hero h1 {
+        color: #ffffff;
+        font-size: clamp(2rem, 4vw, 3.15rem);
+        line-height: 1.08;
+        letter-spacing: -.045em;
+        margin: 0 0 .8rem 0;
+        font-weight: 800;
+      }
+      .hero-copy {
+        color: #d8eeea;
+        max-width: 720px;
+        font-size: 1rem;
+        line-height: 1.65;
+        margin: 0;
+      }
+      .hero-meta { margin-top: 1.25rem; display: flex; gap: .55rem; flex-wrap: wrap; }
+      .hero-pill {
+        display: inline-block;
+        border: 1px solid rgba(222,255,247,.25);
+        background: rgba(255,255,255,.10);
+        color: #effffb;
+        border-radius: 999px;
+        padding: .42rem .78rem;
+        font-size: .78rem;
+        font-weight: 600;
+      }
+      .section-eyebrow {
+        color: #23877b;
+        text-transform: uppercase;
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .14em;
+        margin: .15rem 0 .3rem 0;
+      }
+      .section-title {
+        color: #173b40;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -.025em;
+        margin: 0 0 .25rem 0;
+      }
+      .section-copy { color: #687d80; font-size: .9rem; margin-bottom: .85rem; }
+      .metric-card {
+        background: rgba(255,255,255,.92);
+        border: 1px solid #e1ece9;
+        border-radius: 17px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 7px 22px rgba(21, 67, 68, .045);
+        min-height: 112px;
+      }
+      .metric-label {
+        color: #6c8182;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+      .metric-value {
+        color: #174b4b;
+        font-size: 1.8rem;
+        line-height: 1.2;
+        font-weight: 800;
+        margin-top: .38rem;
+      }
+      .metric-note { color: #829392; font-size: .75rem; margin-top: .2rem; }
+      .panel-heading {
+        color: #173b40;
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0 0 .15rem 0;
+      }
+      .panel-subheading { color: #718487; font-size: .82rem; margin: 0 0 .9rem 0; }
+      .result-card {
+        background: linear-gradient(135deg, #103c43 0%, #176b68 100%);
+        color: white;
+        border-radius: 22px;
+        padding: 1.5rem 1.6rem;
+        box-shadow: 0 16px 36px rgba(16, 60, 67, .16);
+        margin: .7rem 0 1rem 0;
+      }
+      .result-label {
+        color: #bce7dd;
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .13em;
+        font-weight: 800;
+      }
+      .result-number {
+        color: #ffffff;
+        font-size: clamp(2.5rem, 5vw, 3.8rem);
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: -.05em;
+        margin: .45rem 0 .15rem 0;
+      }
+      .result-unit { color: #d5f0e9; font-size: .95rem; }
+      .detail-chip {
+        background: #f0f7f5;
+        border: 1px solid #deebe7;
+        color: #315c5b;
+        border-radius: 12px;
+        padding: .75rem .85rem;
+        height: 100%;
+      }
+      .detail-label { color: #718785; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+      .detail-value { color: #1c4647; font-size: .94rem; font-weight: 700; margin-top: .25rem; }
+      div.stButton > button, div.stFormSubmitButton > button {
+        border-radius: 12px;
+        font-weight: 800;
+        min-height: 3rem;
+      }
+      div.stFormSubmitButton > button[kind="primary"] {
+        background: linear-gradient(90deg, #176b68, #23877b);
+        border: 0;
+      }
+      [data-testid="stForm"] {
+        background: #ffffff;
+        border: 1px solid #e0ebe8;
+        border-radius: 20px;
+        padding: 1.25rem 1.35rem 1.15rem 1.35rem;
+        box-shadow: 0 9px 26px rgba(21, 67, 68, .045);
+      }
+      [data-testid="stMetric"] {
+        background: #ffffff;
+        border: 1px solid #e0ebe8;
+        border-radius: 15px;
+        padding: .85rem 1rem;
+      }
+      [data-testid="stAlert"] { border-radius: 13px; }
+      .footer-note {
+        color: #839394;
+        font-size: .78rem;
+        text-align: center;
+        padding: 1.2rem .5rem .2rem .5rem;
+        border-top: 1px solid #e6eeec;
+        margin-top: 2rem;
+      }
+      @media (max-width: 700px) {
+        .block-container { padding: 1rem 1rem 2rem 1rem; }
+        .hero { padding: 1.55rem 1.25rem; border-radius: 18px; }
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# -----------------------------------------------------------------------------
+# Header
+# -----------------------------------------------------------------------------
+st.markdown(
+    """
+    <div class="hero">
+      <div class="hero-kicker">🌿 Bandung air quality lab</div>
+      <h1>Memahami udara.<br>Memperkirakan esok beberapa jam ke depan.</h1>
+      <p class="hero-copy">
+        Dashboard simulasi prediksi konsentrasi PM2.5 untuk lima stasiun pemantauan
+        di Kota Bandung, menggunakan data pengamatan historis dan model machine learning.
+      </p>
+      <div class="hero-meta">
+        <span class="hero-pill">◉ Prediksi +3 jam</span>
+        <span class="hero-pill">⌖ 5 stasiun pemantauan</span>
+        <span class="hero-pill">▧ Simulasi data historis</span>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# -----------------------------------------------------------------------------
+# Load model and historical data
+# -----------------------------------------------------------------------------
+@st.cache_resource
+def get_resources():
+    return load_resources()
+
+
+try:
+    model, metadata, history = get_resources()
+except Exception as exc:
+    st.error(
+        "Model atau data historis belum dapat dimuat. Pastikan versi library sesuai "
+        "requirements.txt dan seluruh file artifact tersedia."
+    )
+    st.exception(exc)
+    st.stop()
+
+history_times = history.index.get_level_values("timestamp")
+min_time = pd.Timestamp(history_times.min()).to_pydatetime()
+max_time = pd.Timestamp(history_times.max()).to_pydatetime()
+
+st.markdown('<div class="section-eyebrow">Ringkasan model</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Performa model pada data uji</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-copy">Metrik evaluasi model final Tahap F dari pengujian proyek.</div>',
+    unsafe_allow_html=True,
+)
+
+m1, m2, m3 = st.columns(3)
+with m1:
+    st.markdown(
+        '<div class="metric-card"><div class="metric-label">Mean absolute error</div>'
+        '<div class="metric-value">4.64</div><div class="metric-note">µg/m³ · semakin kecil semakin baik</div></div>',
+        unsafe_allow_html=True,
+    )
+with m2:
+    st.markdown(
+        '<div class="metric-card"><div class="metric-label">Root mean squared error</div>'
+        '<div class="metric-value">6.33</div><div class="metric-note">µg/m³ · data uji</div></div>',
+        unsafe_allow_html=True,
+    )
+with m3:
+    st.markdown(
+        '<div class="metric-card"><div class="metric-label">R² score</div>'
+        '<div class="metric-value">0.713</div><div class="metric-note">Koefisien determinasi · data uji</div></div>',
+        unsafe_allow_html=True,
+    )
+
+st.write("")
+with st.expander("Tentang data dan batasan aplikasi", expanded=False):
+    st.write(
+        "Aplikasi berjalan dalam mode demonstrasi berbasis arsip historis. "
+        "Nilai sensor pada waktu pengamatan dimasukkan oleh pengguna, sedangkan "
+        "fitur lag diambil dari pengamatan historis stasiun yang sama pada timestamp tepat. "
+        "Aplikasi ini belum terhubung ke sensor real-time."
+    )
+    st.caption(
+        f"Rentang arsip: {min_time:%d %b %Y %H:%M} – "
+        f"{max_time:%d %b %Y %H:%M} WIB"
+    )
+
+
+# -----------------------------------------------------------------------------
+# Prediction form
+# -----------------------------------------------------------------------------
+st.markdown('<div class="section-eyebrow">Prediction workspace</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Bangun skenario pengamatan</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-copy">Masukkan kondisi sensor dan cuaca untuk memperkirakan PM2.5 tiga jam berikutnya.</div>',
+    unsafe_allow_html=True,
+)
+
+with st.form("observation_form"):
+    st.markdown('<div class="panel-heading">01 · Lokasi dan waktu</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="panel-subheading">Pilih stasiun serta timestamp pengamatan yang tercakup dalam arsip.</div>',
+        unsafe_allow_html=True,
+    )
+    c1, c2 = st.columns(2)
+    with c1:
+        station = st.selectbox("Stasiun pemantauan", STATIONS)
+        observation_date = st.date_input(
+            "Tanggal pengamatan",
+            value=max_time.date(),
+            min_value=min_time.date(),
+            max_value=max_time.date(),
+        )
+    with c2:
+        observation_time = st.time_input(
+            "Waktu pengamatan (WIB)",
+            value=max_time.time().replace(second=0, microsecond=0),
+            step=timedelta(hours=1),
+        )
+
+    st.divider()
+    st.markdown('<div class="panel-heading">02 · Parameter sensor dan cuaca</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="panel-subheading">Masukkan nilai pengamatan pada stasiun dan waktu yang dipilih.</div>',
+        unsafe_allow_html=True,
+    )
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        pm25 = st.number_input(
+            "PM2.5 (µg/m³)", min_value=0.0, max_value=1000.0, value=25.0, step=0.1
+        )
+        temperature = st.number_input(
+            "Suhu udara (°C)", min_value=-10.0, max_value=60.0, value=27.0, step=0.1
+        )
+    with c2:
+        humidity = st.number_input(
             "Kelembapan (%)", min_value=0.0, max_value=100.0, value=70.0, step=0.1
         )
         wind_speed = st.number_input(
@@ -126,3 +478,8 @@ st.markdown(
     f'<div class="footer-note">'
     f'Model: {metadata.get("selected_model", "sesuai metadata")} '
     f'&nbsp;·&nbsp; Horizon: {metadata.get("horizon_hours", 3)} jam '
+    f'&nbsp;·&nbsp; Machine Learning Project — Kasus 06<br>'
+    f'Arsip historis: {min_time:%d %b %Y} – {max_time:%d %b %Y}'
+    f'</div>',
+    unsafe_allow_html=True,
+)
