@@ -1,0 +1,100 @@
+{
+  "project": "Prediksi PM2.5 Kota Bandung",
+  "stage": "H",
+  "model_file": "artifacts/model.joblib",
+  "model_name": "HistGradientBoosting",
+  "model_source_stage": "F",
+  "model_selection_split": "validation",
+  "target": "target_pm25_3jam",
+  "forecast_horizon_hours": 3,
+  "feature_columns": [
+    "pm25_ugm3",
+    "suhu_C",
+    "kelembaban_pct",
+    "kecepatan_angin_ms",
+    "curah_hujan_mm",
+    "arah_angin_sin",
+    "arah_angin_cos",
+    "jam_sin",
+    "jam_cos",
+    "hari_minggu_sin",
+    "hari_minggu_cos",
+    "bulan_sin",
+    "bulan_cos",
+    "pm25_lag_1h",
+    "pm25_lag_3h",
+    "pm25_lag_24h",
+    "stasiun_std"
+  ],
+  "numeric_features": [
+    "pm25_ugm3",
+    "suhu_C",
+    "kelembaban_pct",
+    "kecepatan_angin_ms",
+    "curah_hujan_mm",
+    "arah_angin_sin",
+    "arah_angin_cos",
+    "jam_sin",
+    "jam_cos",
+    "hari_minggu_sin",
+    "hari_minggu_cos",
+    "bulan_sin",
+    "bulan_cos",
+    "pm25_lag_1h",
+    "pm25_lag_3h",
+    "pm25_lag_24h"
+  ],
+  "categorical_features": [
+    "stasiun_std"
+  ],
+  "training_rows": 72043,
+  "validation_rows": 7246,
+  "validation_metrics": {
+    "model_mae_ugm3": 4.665022700264269,
+    "persistence_mae_ugm3": 6.247640077284019,
+    "improvement_vs_persistence_percent": 25.331442871909914,
+    "warning_threshold_ugm3": 55.0,
+    "warning_recall": 0.09302325581395349,
+    "warning_precision": 0.8
+  },
+  "final_test_metrics": {
+    "test_rows": 7252,
+    "target_period_start": "2026-05-01 00:00:00",
+    "target_period_end": "2026-06-30 23:00:00",
+    "mae_model_all_test_ugm3": 4.639777360435343,
+    "rmse_model_all_test_ugm3": 6.326105711326343,
+    "r2_model_all_test": 0.7126763068911348,
+    "mae_model_comparable_ugm3": 4.634826248802944,
+    "mae_persistence_comparable_ugm3": 6.558305693753456,
+    "improvement_vs_persistence_percent": 29.328908025476085,
+    "warning_threshold_ugm3": 55.0,
+    "warning_recall": 0.3054393305439331,
+    "warning_precision": 0.6134453781512605,
+    "false_alarm_count": 46,
+    "false_negative_count": 166
+  },
+  "runtime_versions": {
+    "python": "3.13.18",
+    "pandas": "2.2.3",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.6.1",
+    "joblib": "1.6.0"
+  },
+  "artifact_integrity": {
+    "model_sha256": "8387b2bd0b4dce73011be27b324b70273cd23cf1319d2f81252648fe540122f6",
+    "model_size_bytes": 387778
+  },
+  "deployment_notes": [
+    "Gunakan versi Python dan library yang tercantum untuk kompatibilitas.",
+    "Pipeline sudah mencakup preprocessing/imputasi dan model; jangan fit ulang untuk inferensi.",
+    "Masukan harus menyediakan seluruh feature_columns dengan nama dan tipe yang sesuai.",
+    "stasiun_std adalah fitur kategorikal; nilai stasiun harus konsisten dengan label saat pelatihan.",
+    "Target merupakan PM2.5 tiga jam setelah timestamp observasi.",
+    "Ambang evaluasi peringatan adalah >55 µg/m³; recall test perlu diperhatikan."
+  ],
+  "provenance": {
+    "stage_F_metadata": "model_selection_tahap_F.json",
+    "stage_G_metadata": "metadata_evaluasi_final_tahap_G.json",
+    "test_evaluation_note": "Hasil test Tahap G dicatat; model tidak dilatih ulang atau dipilih ulang."
+  }
+}
