@@ -31,20 +31,54 @@ st.markdown(
       html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif;
       }
-      /* Background luar halaman: nuansa udara, gradasi lembut, dan aksen organik. */
-      html, body, [data-testid="stAppViewContainer"] {
-        background-color: #eef5f4 !important;
+      /* Latar luar halaman: gradasi mint-biru yang jelas terlihat di sisi kartu. */
+      html, body {
+        min-height: 100%;
+        background: #e4f0ee !important;
+      }
+      .stApp {
+        min-height: 100vh;
+        background:
+          radial-gradient(ellipse 42rem 34rem at 0% 16%, rgba(35, 155, 132, .40) 0%, rgba(35, 155, 132, 0) 72%),
+          radial-gradient(ellipse 40rem 32rem at 100% 14%, rgba(74, 145, 190, .34) 0%, rgba(74, 145, 190, 0) 72%),
+          radial-gradient(ellipse 44rem 34rem at 88% 92%, rgba(50, 153, 126, .30) 0%, rgba(50, 153, 126, 0) 72%),
+          radial-gradient(ellipse 34rem 26rem at 8% 88%, rgba(102, 177, 163, .22) 0%, rgba(102, 177, 163, 0) 70%),
+          linear-gradient(132deg, #dcefeb 0%, #f1f7f8 48%, #e0edf4 100%) !important;
+        background-attachment: fixed !important;
+      }
+      /* Ornamen lengkung tipis seperti aliran udara di area luar kartu. */
+      .stApp::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image:
+          repeating-radial-gradient(circle at 2% 18%, transparent 0 76px, rgba(26, 111, 105, .10) 77px 79px, transparent 80px 118px),
+          repeating-radial-gradient(circle at 98% 82%, transparent 0 92px, rgba(46, 115, 151, .09) 93px 95px, transparent 96px 140px);
+      }
+      .stApp::after {
+        content: "";
+        position: fixed;
+        width: 310px;
+        height: 310px;
+        right: -150px;
+        top: 145px;
+        z-index: 0;
+        pointer-events: none;
+        border: 1px solid rgba(40, 125, 133, .15);
+        border-radius: 50%;
+        box-shadow: 0 0 0 28px rgba(40, 125, 133, .045), 0 0 0 58px rgba(40, 125, 133, .035);
+      }
+      [data-testid="stAppViewContainer"],
+      [data-testid="stMain"],
+      [data-testid="stMainBlockContainer"],
+      .main {
+        background: transparent !important;
       }
       [data-testid="stAppViewContainer"] {
-        background-image:
-          radial-gradient(ellipse at 7% 9%, rgba(35, 135, 123, .19) 0%, rgba(35, 135, 123, 0) 27%),
-          radial-gradient(ellipse at 94% 18%, rgba(77, 151, 174, .16) 0%, rgba(77, 151, 174, 0) 25%),
-          radial-gradient(ellipse at 73% 92%, rgba(83, 157, 132, .13) 0%, rgba(83, 157, 132, 0) 31%),
-          linear-gradient(135deg, #eaf4f1 0%, #f6f9fa 48%, #edf4f7 100%);
-        background-attachment: fixed;
-      }
-      [data-testid="stMain"], .main {
-        background: transparent !important;
+        position: relative;
+        z-index: 1;
       }
       [data-testid="stHeader"] { background: rgba(0,0,0,0); }
       .block-container {
@@ -169,9 +203,15 @@ st.markdown(
         color: #173b40;
         font-size: 1.05rem;
         font-weight: 800;
-        margin: 0 0 .15rem 0;
+        line-height: 1.3;
+        margin: .05rem 0 .12rem 0;
       }
-      .panel-subheading { color: #718487; font-size: .82rem; margin: 0 0 .9rem 0; }
+      .panel-subheading {
+        color: #637b7d;
+        font-size: .84rem;
+        line-height: 1.45;
+        margin: 0 0 .18rem 0;
+      }
       .result-card {
         background: linear-gradient(135deg, #103c43 0%, #176b68 100%);
         color: white;
@@ -217,10 +257,33 @@ st.markdown(
       }
       [data-testid="stForm"] {
         background: #ffffff;
-        border: 1px solid #e0ebe8;
+        border: 1px solid #dce9e6;
         border-radius: 20px;
-        padding: 1.35rem 1.45rem 1.25rem 1.45rem;
-        box-shadow: 0 9px 26px rgba(21, 67, 68, .045);
+        padding: 1.25rem 1.4rem 1.15rem 1.4rem;
+        box-shadow: 0 12px 32px rgba(21, 67, 68, .075);
+      }
+      /* Rapikan jarak antar-widget dan antar-bagian di dalam form. */
+      [data-testid="stForm"] [data-testid="stVerticalBlock"] {
+        gap: .42rem !important;
+      }
+      [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+        gap: 1rem !important;
+        align-items: flex-start !important;
+      }
+      [data-testid="stForm"] [data-testid="stMarkdownContainer"] p {
+        margin-bottom: .12rem !important;
+      }
+      [data-testid="stForm"] [data-testid="stWidgetLabel"] {
+        margin-bottom: .12rem !important;
+      }
+      [data-testid="stForm"] [data-testid="stElementContainer"] {
+        margin-bottom: 0 !important;
+      }
+      .form-section-divider {
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, rgba(35,135,123,.28), rgba(35,135,123,.06));
+        margin: .18rem 0 .34rem 0;
       }
       /* Make widget labels and helper text readable on light backgrounds. */
       [data-testid="stWidgetLabel"] p,
@@ -426,7 +489,7 @@ with st.form("observation_form"):
             help="Pilih jam ketika kondisi sensor dan cuaca diamati.",
         )
 
-    st.divider()
+    st.markdown('<div class="form-section-divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="panel-heading">02 · Parameter sensor dan cuaca</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="panel-subheading">Enam kolom di bawah berisi kondisi pada waktu pengamatan yang dipilih, bukan hasil prediksi.</div>',
