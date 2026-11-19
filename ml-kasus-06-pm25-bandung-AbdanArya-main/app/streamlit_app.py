@@ -31,8 +31,20 @@ st.markdown(
       html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif;
       }
+      /* Background luar halaman: nuansa udara, gradasi lembut, dan aksen organik. */
+      html, body, [data-testid="stAppViewContainer"] {
+        background-color: #eef5f4 !important;
+      }
       [data-testid="stAppViewContainer"] {
-        background: linear-gradient(180deg, #f2f7f6 0%, #f7f9fb 42%, #ffffff 100%);
+        background-image:
+          radial-gradient(ellipse at 7% 9%, rgba(35, 135, 123, .19) 0%, rgba(35, 135, 123, 0) 27%),
+          radial-gradient(ellipse at 94% 18%, rgba(77, 151, 174, .16) 0%, rgba(77, 151, 174, 0) 25%),
+          radial-gradient(ellipse at 73% 92%, rgba(83, 157, 132, .13) 0%, rgba(83, 157, 132, 0) 31%),
+          linear-gradient(135deg, #eaf4f1 0%, #f6f9fa 48%, #edf4f7 100%);
+        background-attachment: fixed;
+      }
+      [data-testid="stMain"], .main {
+        background: transparent !important;
       }
       [data-testid="stHeader"] { background: rgba(0,0,0,0); }
       .block-container {
