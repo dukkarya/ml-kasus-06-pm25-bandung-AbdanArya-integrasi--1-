@@ -188,8 +188,54 @@ st.markdown(
         background: #ffffff;
         border: 1px solid #e0ebe8;
         border-radius: 20px;
-        padding: 1.25rem 1.35rem 1.15rem 1.35rem;
+        padding: 1.35rem 1.45rem 1.25rem 1.45rem;
         box-shadow: 0 9px 26px rgba(21, 67, 68, .045);
+      }
+      /* Make widget labels and helper text readable on light backgrounds. */
+      [data-testid="stWidgetLabel"] p,
+      [data-testid="stWidgetLabel"] label,
+      [data-testid="stForm"] label {
+        color: #173b40 !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+      }
+      [data-testid="stCaptionContainer"] p {
+        color: #5c7375 !important;
+        font-size: .82rem !important;
+        line-height: 1.45 !important;
+      }
+      [data-testid="stNumberInput"] input,
+      [data-testid="stDateInput"] input,
+      [data-testid="stTimeInput"] input {
+        color: #173b40 !important;
+        background: #f8fbfa !important;
+        border-color: #bdcfcc !important;
+        font-weight: 600 !important;
+      }
+      [data-baseweb="select"] > div {
+        color: #173b40 !important;
+        background: #f8fbfa !important;
+        border-color: #bdcfcc !important;
+      }
+      [data-testid="stForm"] [data-testid="stAlert"] {
+        border-radius: 12px;
+      }
+      .input-intro {
+        color: #415f61;
+        background: #eef7f4;
+        border: 1px solid #d8eae4;
+        border-left: 4px solid #23877b;
+        border-radius: 12px;
+        padding: .8rem 1rem;
+        margin: .65rem 0 1rem 0;
+        font-size: .9rem;
+        line-height: 1.55;
+      }
+      .input-group-title {
+        color: #173b40;
+        font-size: .9rem;
+        font-weight: 800;
+        margin: .25rem 0 .45rem 0;
       }
       [data-testid="stMetric"] {
         background: #ffffff;
@@ -315,53 +361,89 @@ st.markdown(
 with st.form("observation_form"):
     st.markdown('<div class="panel-heading">01 · Lokasi dan waktu</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="panel-subheading">Pilih stasiun serta timestamp pengamatan yang tercakup dalam arsip.</div>',
+        '<div class="panel-subheading">Tentukan stasiun dan waktu ketika kondisi udara diamati. Pilihan tanggal harus berada dalam rentang arsip.</div>',
         unsafe_allow_html=True,
     )
     c1, c2 = st.columns(2)
     with c1:
-        station = st.selectbox("Stasiun pemantauan", STATIONS)
+        station = st.selectbox(
+            "Stasiun pemantauan",
+            STATIONS,
+            help="Pilih lokasi stasiun tempat data kondisi udara diamati.",
+        )
         observation_date = st.date_input(
             "Tanggal pengamatan",
             value=max_time.date(),
             min_value=min_time.date(),
             max_value=max_time.date(),
+            help="Pilih tanggal pengamatan yang tersedia dalam arsip historis.",
         )
     with c2:
         observation_time = st.time_input(
             "Waktu pengamatan (WIB)",
             value=max_time.time().replace(second=0, microsecond=0),
             step=timedelta(hours=1),
+            help="Pilih jam ketika kondisi sensor dan cuaca diamati.",
         )
 
     st.divider()
     st.markdown('<div class="panel-heading">02 · Parameter sensor dan cuaca</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="panel-subheading">Masukkan nilai pengamatan pada stasiun dan waktu yang dipilih.</div>',
+        '<div class="panel-subheading">Enam kolom di bawah berisi kondisi pada waktu pengamatan yang dipilih, bukan hasil prediksi.</div>',
         unsafe_allow_html=True,
     )
+    st.markdown(
+        '<div class="input-intro"><strong>Petunjuk pengisian:</strong> angka yang sudah terisi adalah contoh awal, '
+        'bukan pembacaan sensor otomatis. Ganti setiap angka sesuai data pengamatan pada stasiun, tanggal, dan jam di atas. '
+        'Jangan menganggap angka contoh sebagai kondisi aktual.</div>',
+        unsafe_allow_html=True,
+    )
+
     c1, c2, c3 = st.columns(3)
     with c1:
+        st.markdown('<div class="input-group-title">Partikel udara</div>', unsafe_allow_html=True)
         pm25 = st.number_input(
-            "PM2.5 (µg/m³)", min_value=0.0, max_value=1000.0, value=25.0, step=0.1
+            "PM2.5 (µg/m³)", min_value=0.0, max_value=1000.0, value=25.0, step=0.1,
+            help="Konsentrasi partikel halus PM2.5 yang terukur pada stasiun dan waktu pengamatan pilihan.",
         )
+        st.caption("Jumlah partikel halus di udara. Isi dengan hasil pengukuran PM2.5.")
+
+        st.markdown('<div class="input-group-title">Suhu udara</div>', unsafe_allow_html=True)
         temperature = st.number_input(
-            "Suhu udara (°C)", min_value=-10.0, max_value=60.0, value=27.0, step=0.1
+            "Suhu udara (°C)", min_value=-10.0, max_value=60.0, value=27.0, step=0.1,
+            help="Suhu udara pada stasiun dan waktu pengamatan pilihan, dalam derajat Celsius.",
         )
+        st.caption("Temperatur udara saat pengamatan berlangsung.")
+
     with c2:
+        st.markdown('<div class="input-group-title">Kelembapan udara</div>', unsafe_allow_html=True)
         humidity = st.number_input(
-            "Kelembapan (%)", min_value=0.0, max_value=100.0, value=70.0, step=0.1
+            "Kelembapan (%)", min_value=0.0, max_value=100.0, value=70.0, step=0.1,
+            help="Persentase kelembapan udara pada waktu pengamatan pilihan.",
         )
+        st.caption("Tingkat kelembapan relatif udara dalam persen.")
+
+        st.markdown('<div class="input-group-title">Kecepatan angin</div>', unsafe_allow_html=True)
         wind_speed = st.number_input(
-            "Kecepatan angin (m/s)", min_value=0.0, max_value=100.0, value=2.0, step=0.1
+            "Kecepatan angin (m/s)", min_value=0.0, max_value=100.0, value=2.0, step=0.1,
+            help="Kecepatan angin yang tercatat pada waktu pengamatan, dalam meter per detik.",
         )
+        st.caption("Seberapa cepat angin bertiup, dalam meter per detik.")
+
     with c3:
+        st.markdown('<div class="input-group-title">Arah angin</div>', unsafe_allow_html=True)
         wind_direction = st.number_input(
-            "Arah angin (derajat)", min_value=0.0, max_value=360.0, value=180.0, step=1.0
+            "Arah angin (derajat)", min_value=0.0, max_value=360.0, value=180.0, step=1.0,
+            help="Nilai arah angin dalam derajat sesuai data pengamatan. Rentang input tetap 0–360 derajat.",
         )
+        st.caption("Arah angin yang dicatat sensor, dalam derajat.")
+
+        st.markdown('<div class="input-group-title">Curah hujan</div>', unsafe_allow_html=True)
         rainfall = st.number_input(
-            "Curah hujan (mm)", min_value=0.0, max_value=1000.0, value=0.0, step=0.1
+            "Curah hujan (mm)", min_value=0.0, max_value=1000.0, value=0.0, step=0.1,
+            help="Curah hujan pada waktu pengamatan pilihan, dalam milimeter.",
         )
+        st.caption("Jumlah curah hujan yang tercatat, dalam milimeter.")
 
     st.write("")
     submitted = st.form_submit_button(
