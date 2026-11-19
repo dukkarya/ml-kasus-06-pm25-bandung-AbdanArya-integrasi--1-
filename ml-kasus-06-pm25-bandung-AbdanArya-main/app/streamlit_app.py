@@ -102,9 +102,9 @@ st.markdown(
       }
       [data-testid="stHeader"] { background: rgba(0,0,0,0); }
       .block-container {
-        max-width: 1180px;
-        padding-top: 2rem;
-        padding-bottom: 3rem;
+        max-width: 1240px;
+        padding-top: 2.1rem;
+        padding-bottom: 3.2rem;
       }
       .hero {
         padding: 2.1rem 2.2rem;
@@ -221,16 +221,16 @@ st.markdown(
       .metric-note { color: #829392; font-size: .75rem; margin-top: .2rem; }
       .panel-heading {
         color: #173b40;
-        font-size: 1.05rem;
+        font-size: 1.08rem;
         font-weight: 800;
-        line-height: 1.3;
-        margin: .05rem 0 .12rem 0;
+        line-height: 1.4;
+        margin: .15rem 0 .38rem 0;
       }
       .panel-subheading {
         color: #637b7d;
-        font-size: .84rem;
-        line-height: 1.45;
-        margin: 0 0 .18rem 0;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: 0 0 .8rem 0;
       }
       .result-card {
         background: linear-gradient(135deg, #103c43 0%, #176b68 100%);
@@ -278,32 +278,33 @@ st.markdown(
       [data-testid="stForm"] {
         background: #ffffff;
         border: 1px solid #dce9e6;
-        border-radius: 20px;
-        padding: 1.25rem 1.4rem 1.15rem 1.4rem;
+        border-radius: 22px;
+        padding: 1.65rem 1.75rem 1.55rem 1.75rem;
         box-shadow: 0 12px 32px rgba(21, 67, 68, .075);
       }
-      /* Rapikan jarak antar-widget dan antar-bagian di dalam form. */
+      /* Ruang antarkomponen dibuat lega agar form lebih mudah dipindai. */
       [data-testid="stForm"] [data-testid="stVerticalBlock"] {
-        gap: .42rem !important;
+        gap: .62rem !important;
       }
       [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
-        gap: 1rem !important;
+        gap: 1.35rem !important;
         align-items: flex-start !important;
       }
       [data-testid="stForm"] [data-testid="stMarkdownContainer"] p {
-        margin-bottom: .12rem !important;
+        margin-bottom: .28rem !important;
+        line-height: 1.55 !important;
       }
       [data-testid="stForm"] [data-testid="stWidgetLabel"] {
-        margin-bottom: .12rem !important;
+        margin-bottom: .28rem !important;
       }
       [data-testid="stForm"] [data-testid="stElementContainer"] {
-        margin-bottom: 0 !important;
+        margin-bottom: .08rem !important;
       }
       .form-section-divider {
         height: 1px;
         width: 100%;
-        background: linear-gradient(90deg, rgba(35,135,123,.28), rgba(35,135,123,.06));
-        margin: .18rem 0 .34rem 0;
+        background: linear-gradient(90deg, rgba(35,135,123,.30), rgba(35,135,123,.08));
+        margin: .55rem 0 .72rem 0;
       }
       /* Make widget labels and helper text readable on light backgrounds. */
       [data-testid="stWidgetLabel"] p,
@@ -339,17 +340,25 @@ st.markdown(
         background: #eef7f4;
         border: 1px solid #d8eae4;
         border-left: 4px solid #23877b;
-        border-radius: 12px;
-        padding: .8rem 1rem;
-        margin: .65rem 0 1rem 0;
-        font-size: .9rem;
-        line-height: 1.55;
+        border-radius: 13px;
+        padding: .95rem 1.15rem;
+        margin: .85rem 0 1.25rem 0;
+        font-size: .93rem;
+        line-height: 1.7;
       }
       .input-group-title {
         color: #173b40;
-        font-size: .9rem;
+        font-size: .96rem;
         font-weight: 800;
-        margin: .25rem 0 .45rem 0;
+        line-height: 1.45;
+        margin: .12rem 0 .48rem 0;
+      }
+      .input-help {
+        min-height: 2.9rem;
+        color: #718689;
+        font-size: .84rem;
+        line-height: 1.55;
+        margin-top: .28rem;
       }
       [data-testid="stMetric"] {
         background: #ffffff;
@@ -366,9 +375,14 @@ st.markdown(
         border-top: 1px solid #e6eeec;
         margin-top: 2rem;
       }
+      @media (max-width: 900px) {
+        [data-testid="stForm"] { padding: 1.25rem 1.1rem; }
+        [data-testid="stForm"] [data-testid="stHorizontalBlock"] { gap: .8rem !important; }
+      }
       @media (max-width: 700px) {
         .block-container { padding: 1rem 1rem 2rem 1rem; }
         .hero { padding: 1.55rem 1.25rem; border-radius: 18px; }
+        .input-help { min-height: 0; }
       }
     </style>
     """,
@@ -522,51 +536,60 @@ with st.form("observation_form"):
         unsafe_allow_html=True,
     )
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
+    # Baris pertama: PM2.5, kelembapan, dan arah angin.
+    # Baris kedua: suhu, kecepatan angin, dan curah hujan.
+    # Pemisahan baris membuat ketiga kelompok pada baris kedua sejajar,
+    # meskipun tinggi keterangan pada baris pertama berbeda.
+    row1 = st.columns(3, gap="large")
+    with row1[0]:
         st.markdown('<div class="input-group-title">Partikel udara</div>', unsafe_allow_html=True)
         pm25 = st.number_input(
             "PM2.5 (µg/m³)", min_value=0.0, max_value=1000.0, value=25.0, step=0.1,
             help="Konsentrasi partikel halus PM2.5 yang terukur pada stasiun dan waktu pengamatan pilihan.",
         )
-        st.caption("Jumlah partikel Isi dengan hasil pengukuran PM2.5.")
+        st.markdown('<div class="input-help">Jumlah partikel isi dengan hasil pengukuran PM2.5.</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="input-group-title">Suhu udara</div>', unsafe_allow_html=True)
-        temperature = st.number_input(
-            "Suhu udara (°C)", min_value=-10.0, max_value=60.0, value=27.0, step=0.1,
-            help="Suhu udara pada stasiun dan waktu pengamatan pilihan, dalam derajat Celsius.",
-        )
-        st.caption("Temperatur udara saat pengamatan berlangsung.")
-
-    with c2:
+    with row1[1]:
         st.markdown('<div class="input-group-title">Kelembapan udara</div>', unsafe_allow_html=True)
         humidity = st.number_input(
             "Kelembapan (%)", min_value=0.0, max_value=100.0, value=70.0, step=0.1,
             help="Persentase kelembapan udara pada waktu pengamatan pilihan.",
         )
-        st.caption("Tingkat kelembapan relatif udara dalam persen.")
+        st.markdown('<div class="input-help">Tingkat kelembapan relatif udara dalam persen.</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="input-group-title">Kecepatan angin</div>', unsafe_allow_html=True)
-        wind_speed = st.number_input(
-            "Kecepatan angin (m/s)", min_value=0.0, max_value=100.0, value=2.0, step=0.1,
-            help="Kecepatan angin yang tercatat pada waktu pengamatan, dalam meter per detik.",
-        )
-        st.caption("Seberapa cepat angin bertiup, dalam meter per detik.")
-
-    with c3:
+    with row1[2]:
         st.markdown('<div class="input-group-title">Arah angin</div>', unsafe_allow_html=True)
         wind_direction = st.number_input(
             "Arah angin (derajat)", min_value=0.0, max_value=360.0, value=180.0, step=1.0,
             help="Nilai arah angin dalam derajat sesuai data pengamatan. Rentang input tetap 0–360 derajat.",
         )
-        st.caption("Arah angin yang dicatat sensor, dalam derajat.")
+        st.markdown('<div class="input-help">Arah angin yang dicatat sensor, dalam derajat.</div>', unsafe_allow_html=True)
 
+    st.markdown('<div style="height:.55rem"></div>', unsafe_allow_html=True)
+    row2 = st.columns(3, gap="large")
+    with row2[0]:
+        st.markdown('<div class="input-group-title">Suhu udara</div>', unsafe_allow_html=True)
+        temperature = st.number_input(
+            "Suhu udara (°C)", min_value=-10.0, max_value=60.0, value=27.0, step=0.1,
+            help="Suhu udara pada stasiun dan waktu pengamatan pilihan, dalam derajat Celsius.",
+        )
+        st.markdown('<div class="input-help">Temperatur udara saat pengamatan berlangsung.</div>', unsafe_allow_html=True)
+
+    with row2[1]:
+        st.markdown('<div class="input-group-title">Kecepatan angin</div>', unsafe_allow_html=True)
+        wind_speed = st.number_input(
+            "Kecepatan angin (m/s)", min_value=0.0, max_value=100.0, value=2.0, step=0.1,
+            help="Kecepatan angin yang tercatat pada waktu pengamatan, dalam meter per detik.",
+        )
+        st.markdown('<div class="input-help">Seberapa cepat angin bertiup, dalam meter per detik.</div>', unsafe_allow_html=True)
+
+    with row2[2]:
         st.markdown('<div class="input-group-title">Curah hujan</div>', unsafe_allow_html=True)
         rainfall = st.number_input(
             "Curah hujan (mm)", min_value=0.0, max_value=1000.0, value=0.0, step=0.1,
             help="Curah hujan pada waktu pengamatan pilihan, dalam milimeter.",
         )
-        st.caption("Jumlah curah hujan yang tercatat, dalam milimeter.")
+        st.markdown('<div class="input-help">Jumlah curah hujan yang tercatat, dalam milimeter.</div>', unsafe_allow_html=True)
 
     st.write("")
     submitted = st.form_submit_button(
