@@ -31,25 +31,32 @@ st.markdown(
       html, body, [class*="css"] {
         font-family: 'DM Sans', sans-serif;
       }
-      /* Latar luar halaman: gradasi mint-biru yang jelas terlihat di sisi kartu. */
-      html, body {
-        min-height: 100%;
+      /* Latar halaman dan ornamen dekoratif, tanpa mengunci scroll browser. */
+      html, body, #root {
+        min-height: 100% !important;
+        height: auto !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
         background: #e4f0ee !important;
       }
       .stApp {
-        min-height: 100vh;
+        position: relative;
+        isolation: isolate;
+        min-height: 100vh !important;
+        height: auto !important;
+        overflow: visible !important;
         background:
           radial-gradient(ellipse 42rem 34rem at 0% 16%, rgba(35, 155, 132, .40) 0%, rgba(35, 155, 132, 0) 72%),
           radial-gradient(ellipse 40rem 32rem at 100% 14%, rgba(74, 145, 190, .34) 0%, rgba(74, 145, 190, 0) 72%),
           radial-gradient(ellipse 44rem 34rem at 88% 92%, rgba(50, 153, 126, .30) 0%, rgba(50, 153, 126, 0) 72%),
           radial-gradient(ellipse 34rem 26rem at 8% 88%, rgba(102, 177, 163, .22) 0%, rgba(102, 177, 163, 0) 70%),
           linear-gradient(132deg, #dcefeb 0%, #f1f7f8 48%, #e0edf4 100%) !important;
-        background-attachment: fixed !important;
+        background-attachment: scroll !important;
       }
-      /* Ornamen lengkung tipis seperti aliran udara di area luar kartu. */
+      /* Ornamen ikut memanjang bersama halaman; tidak menutupi area input. */
       .stApp::before {
         content: "";
-        position: fixed;
+        position: absolute;
         inset: 0;
         z-index: 0;
         pointer-events: none;
@@ -59,7 +66,7 @@ st.markdown(
       }
       .stApp::after {
         content: "";
-        position: fixed;
+        position: absolute;
         width: 310px;
         height: 310px;
         right: -150px;
@@ -76,9 +83,22 @@ st.markdown(
       .main {
         background: transparent !important;
       }
+      /* Kembalikan tinggi alami konten agar bagian bawah bisa di-scroll. */
       [data-testid="stAppViewContainer"] {
         position: relative;
         z-index: 1;
+        min-height: 100vh !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      [data-testid="stMain"] {
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+        flex: 1 0 auto !important;
+      }
+      [data-testid="stMainBlockContainer"] {
+        overflow: visible !important;
       }
       [data-testid="stHeader"] { background: rgba(0,0,0,0); }
       .block-container {
