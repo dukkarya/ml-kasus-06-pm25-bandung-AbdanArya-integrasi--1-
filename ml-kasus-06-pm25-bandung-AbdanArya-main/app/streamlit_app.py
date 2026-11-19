@@ -529,7 +529,7 @@ with st.form("observation_form"):
             "PM2.5 (µg/m³)", min_value=0.0, max_value=1000.0, value=25.0, step=0.1,
             help="Konsentrasi partikel halus PM2.5 yang terukur pada stasiun dan waktu pengamatan pilihan.",
         )
-        st.caption("Jumlah partikel halus di udara. Isi dengan hasil pengukuran PM2.5.")
+        st.caption("Jumlah partikel Isi dengan hasil pengukuran PM2.5.")
 
         st.markdown('<div class="input-group-title">Suhu udara</div>', unsafe_allow_html=True)
         temperature = st.number_input(
