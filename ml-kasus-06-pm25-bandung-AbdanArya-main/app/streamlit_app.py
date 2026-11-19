@@ -111,6 +111,25 @@ st.markdown(
         margin: 0 0 .25rem 0;
       }
       .section-copy { color: #687d80; font-size: .9rem; margin-bottom: .85rem; }
+      .workspace-header {
+        margin: 1.65rem 0 .9rem 0;
+        padding: 0 .1rem;
+      }
+      .workspace-header .section-eyebrow {
+        margin: 0 0 .38rem 0;
+      }
+      .workspace-header .section-title {
+        font-size: clamp(1.45rem, 2.2vw, 1.8rem);
+        line-height: 1.2;
+        margin: 0 0 .38rem 0;
+      }
+      .workspace-header .section-copy {
+        color: #607779;
+        font-size: .94rem;
+        line-height: 1.55;
+        margin: 0;
+        max-width: 760px;
+      }
       .metric-card {
         background: rgba(255,255,255,.92);
         border: 1px solid #e1ece9;
@@ -351,10 +370,17 @@ with st.expander("Tentang data dan batasan aplikasi", expanded=False):
 # -----------------------------------------------------------------------------
 # Prediction form
 # -----------------------------------------------------------------------------
-st.markdown('<div class="section-eyebrow">Prediction workspace</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-title">Bangun skenario pengamatan</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-copy">Masukkan kondisi sensor dan cuaca untuk memperkirakan PM2.5 tiga jam berikutnya.</div>',
+    """
+    <div class="workspace-header">
+      <div class="section-eyebrow">PREDIKSI PM2.5</div>
+      <div class="section-title">Masukkan data pengamatan</div>
+      <div class="section-copy">
+        Pilih stasiun dan waktu pengamatan, lalu sesuaikan enam nilai sensor dan cuaca
+        untuk memperkirakan konsentrasi PM2.5 tiga jam berikutnya.
+      </div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -364,13 +390,15 @@ with st.form("observation_form"):
         '<div class="panel-subheading">Tentukan stasiun dan waktu ketika kondisi udara diamati. Pilihan tanggal harus berada dalam rentang arsip.</div>',
         unsafe_allow_html=True,
     )
-    c1, c2 = st.columns(2)
+    # Three aligned controls avoid an empty space below the time field.
+    c1, c2, c3 = st.columns([1.2, 1, 1])
     with c1:
         station = st.selectbox(
             "Stasiun pemantauan",
             STATIONS,
             help="Pilih lokasi stasiun tempat data kondisi udara diamati.",
         )
+    with c2:
         observation_date = st.date_input(
             "Tanggal pengamatan",
             value=max_time.date(),
@@ -378,7 +406,7 @@ with st.form("observation_form"):
             max_value=max_time.date(),
             help="Pilih tanggal pengamatan yang tersedia dalam arsip historis.",
         )
-    with c2:
+    with c3:
         observation_time = st.time_input(
             "Waktu pengamatan (WIB)",
             value=max_time.time().replace(second=0, microsecond=0),
