@@ -8,8 +8,7 @@
 | Kasus | Kasus 06 — Prakiraan PM2.5 Bandung |
 | Bidang | Supervised Learning — Time-Series Regression |
 | Aplikasi | [Buka Aplikasi Prakiraan PM2.5](https://ml-kasus-06-pm-uzs2bl.streamlit.app/) |
-| Repository | [Repository: https://github.com/dukkarya/ml-kasus-06-pm25-bandung-AbdanArya-integrasi--1-.git] |
-| Video Demo | [Isi tautan video demonstrasi] |
+| Video Demo | [https://drive.google.com/file/d/1U5pn4jDRwRQsbzQ1MWOjhu1ZMeAZlzI1/view?usp=drive_link] |
 
 ## 1. Deskripsi Proyek
 
@@ -293,8 +292,7 @@ Luaran yang dihasilkan dari proyek ini meliputi:
 ## Referensi dan Tautan
 
 - **Aplikasi:** https://ml-kasus-06-pm-uzs2bl.streamlit.app/
-- **Repository:** [Isi tautan repository GitHub]
-- **Video demonstrasi:** [Isi tautan video]
+- **Video demonstrasi:** [https://drive.google.com/file/d/1U5pn4jDRwRQsbzQ1MWOjhu1ZMeAZlzI1/view?usp=drive_link]
 
 ---
 
